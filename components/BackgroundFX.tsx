@@ -9,7 +9,10 @@ const grain =
 
 /**
  * A quiet field of ink dots on paper. Dots near the cursor lean away and swell in the accent colour;
- * a click sends a ripple through them. Respects reduced-motion and never blocks clicks.
+ * a click sends a ripple through them.
+ *
+ * It only draws while something is moving. When the pointer is still, nothing is redrawn, so page
+ * scrolling gets the whole frame budget. Respects reduced-motion and never blocks clicks.
  */
 export default function BackgroundFX() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,6 +26,8 @@ export default function BackgroundFX() {
     let w = 0;
     let h = 0;
     let raf = 0;
+    let lastMove = 0;
+    let dots: { x: number; y: number }[] = [];
     const mouse = { x: -9999, y: -9999, active: false };
     const ripples: { x: number; y: number; t0: number }[] = [];
 
@@ -35,84 +40,108 @@ export default function BackgroundFX() {
       canvas!.style.width = `${w}px`;
       canvas!.style.height = `${h}px`;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (reduceMotion) draw(0);
+      dots = [];
+      for (let y = GAP / 2; y < h; y += GAP) for (let x = GAP / 2; x < w; x += GAP) dots.push({ x, y });
+      draw(performance.now());
     }
 
     function draw(t: number) {
       ctx!.clearRect(0, 0, w, h);
       for (let i = ripples.length - 1; i >= 0; i--) if (t - ripples[i].t0 > 1000) ripples.splice(i, 1);
 
-      for (let y = GAP / 2; y < h; y += GAP) {
-        for (let x = GAP / 2; x < w; x += GAP) {
-          let px = x;
-          let py = y;
-          let r = 1.1;
-          let a = 0.15;
-          let accent = 0;
+      // Most dots are untouched: batch them into a single path. Only dots near the pointer or a ripple are drawn one by one.
+      const hot: { x: number; y: number; r: number; a: number }[] = [];
+      ctx!.fillStyle = "rgba(27,26,23,0.15)";
+      ctx!.beginPath();
+      for (const d of dots) {
+        let px = d.x;
+        let py = d.y;
+        let r = 1.1;
+        let a = 0.15;
+        let touched = false;
 
-          if (mouse.active) {
-            const dx = x - mouse.x;
-            const dy = y - mouse.y;
-            const d = Math.hypot(dx, dy);
-            if (d < REACH && d > 0.5) {
-              const k = 1 - d / REACH;
-              const push = k * k * 11;
-              px += (dx / d) * push;
-              py += (dy / d) * push;
-              r += k * 2.2;
-              a += k * 0.5;
-              accent = k;
-            }
+        if (mouse.active) {
+          const dx = d.x - mouse.x;
+          const dy = d.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < REACH && dist > 0.5) {
+            const k = 1 - dist / REACH;
+            const push = k * k * 11;
+            px += (dx / dist) * push;
+            py += (dy / dist) * push;
+            r += k * 2.2;
+            a += k * 0.5;
+            touched = true;
           }
-          for (const rp of ripples) {
-            const age = (t - rp.t0) / 1000;
-            const ring = age * 280;
-            const off = Math.abs(Math.hypot(x - rp.x, y - rp.y) - ring);
-            if (off < 20) {
-              const k = (1 - off / 20) * (1 - age);
-              r += k * 2.4;
-              a += k * 0.5;
-              accent = Math.max(accent, k);
-            }
-          }
-
-          ctx!.fillStyle = accent > 0.02 ? `rgba(214,69,42,${Math.min(a, 0.8)})` : `rgba(27,26,23,${a})`;
-          ctx!.beginPath();
-          ctx!.arc(px, py, r, 0, Math.PI * 2);
-          ctx!.fill();
         }
+        for (const rp of ripples) {
+          const age = (t - rp.t0) / 1000;
+          const off = Math.abs(Math.hypot(d.x - rp.x, d.y - rp.y) - age * 280);
+          if (off < 20) {
+            const k = (1 - off / 20) * (1 - age);
+            r += k * 2.4;
+            a += k * 0.5;
+            touched = true;
+          }
+        }
+
+        if (touched) hot.push({ x: px, y: py, r, a: Math.min(a, 0.8) });
+        else {
+          ctx!.moveTo(d.x + r, d.y);
+          ctx!.arc(d.x, d.y, r, 0, Math.PI * 2);
+        }
+      }
+      ctx!.fill();
+
+      ctx!.fillStyle = "rgba(214,69,42,0.5)";
+      for (const hd of hot) {
+        ctx!.fillStyle = `rgba(214,69,42,${hd.a})`;
+        ctx!.beginPath();
+        ctx!.arc(hd.x, hd.y, hd.r, 0, Math.PI * 2);
+        ctx!.fill();
       }
     }
 
     function loop(t: number) {
+      const busy = ripples.length > 0 || (mouse.active && t - lastMove < 1200);
+      if (!busy) {
+        // Settle into the resting grid and stop drawing until the pointer moves again.
+        mouse.active = false;
+        draw(t);
+        raf = 0;
+        return;
+      }
       draw(t);
       raf = requestAnimationFrame(loop);
+    }
+    function kick() {
+      if (!raf && !reduceMotion) raf = requestAnimationFrame(loop);
     }
 
     function onMove(e: PointerEvent) {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
       mouse.active = true;
+      lastMove = performance.now();
+      kick();
     }
     function onDown(e: PointerEvent) {
-      if (!reduceMotion) ripples.push({ x: e.clientX, y: e.clientY, t0: performance.now() });
+      if (reduceMotion) return;
+      ripples.push({ x: e.clientX, y: e.clientY, t0: performance.now() });
+      kick();
     }
     function onLeave() {
       mouse.active = false;
-    }
-    function onVisibility() {
-      cancelAnimationFrame(raf);
-      if (!document.hidden && !reduceMotion) raf = requestAnimationFrame(loop);
+      kick();
     }
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerdown", onDown, { passive: true });
-    document.addEventListener("pointerleave", onLeave);
-    document.addEventListener("visibilitychange", onVisibility);
-    if (reduceMotion) draw(0);
-    else raf = requestAnimationFrame(loop);
+    if (!reduceMotion) {
+      window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerdown", onDown, { passive: true });
+      document.addEventListener("pointerleave", onLeave);
+    }
 
     return () => {
       cancelAnimationFrame(raf);
@@ -120,15 +149,15 @@ export default function BackgroundFX() {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerleave", onLeave);
-      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-paper">
       <canvas ref={canvasRef} className="absolute inset-0" />
+      {/* Plain low-opacity texture. No blend mode, which forces the whole page to be re-composited while scrolling. */}
       <div
-        className="absolute inset-0 opacity-[0.07] mix-blend-multiply"
+        className="absolute inset-0 opacity-[0.04]"
         style={{ backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(grain)}")` }}
       />
     </div>

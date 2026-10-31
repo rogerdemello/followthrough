@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${sans.variable} ${hand.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-paper font-sans text-ink antialiased">
         <BackgroundFX />
-        <header className="sticky top-0 z-30 border-b border-ink/15 bg-paper/90 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-ink/15 bg-paper">
           <Nav />
         </header>
         <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:py-12">{children}</main>

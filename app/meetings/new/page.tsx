@@ -559,7 +559,7 @@ export default function NewMeetingPage() {
           </p>
         )}
 
-        <div className="sticky bottom-0 -mx-5 -mb-5 mt-6 rounded-b-xl border-t border-rule bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:-mb-8 sm:px-8">
+        <div className="sticky bottom-0 -mx-5 -mb-5 mt-6 rounded-b-xl border-t border-rule bg-white px-5 py-4 sm:-mx-8 sm:-mb-8 sm:px-8">
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={confirm} disabled={loading || nothingToSave} className={btn.primary}>
               {loading && <Spinner />}
