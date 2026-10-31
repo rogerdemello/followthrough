@@ -17,14 +17,11 @@ export default function Stepper({ current }: { current: 1 | 2 | 3 }) {
       <div className="lg:hidden" role="group" aria-label={`Step ${current} of 3`}>
         <div className="flex gap-1.5">
           {STEPS.map((s) => (
-            <span
-              key={s.n}
-              className={`h-1.5 flex-1 rounded-full ${s.n <= current ? "bg-gradient-to-r from-indigo-400 to-violet-400" : "bg-white/15"}`}
-            />
+            <span key={s.n} className={`h-1.5 flex-1 ${s.n <= current ? "bg-ink" : "bg-rule"}`} />
           ))}
         </div>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-indigo-300">
-          Step {current} of 3 · {active.title}
+        <p className="mt-2 text-sm font-semibold text-ink">
+          Step {current} of 3 <span className="font-normal text-ink-2">· {active.title}</span>
         </p>
       </div>
 
@@ -35,33 +32,33 @@ export default function Stepper({ current }: { current: 1 | 2 | 3 }) {
           return (
             <li
               key={s.n}
-              className="relative flex gap-4 pb-8 last:pb-0"
+              className="relative flex gap-4 pb-9 last:pb-0"
               aria-current={state === "current" ? "step" : undefined}
             >
               {i < STEPS.length - 1 && (
                 <span
                   aria-hidden
-                  className={`absolute left-[15px] top-9 h-[calc(100%-2.25rem)] w-0.5 ${
-                    state === "done" ? "bg-indigo-400" : "bg-white/15"
+                  className={`absolute left-[17px] top-10 h-[calc(100%-2.5rem)] w-px ${
+                    state === "done" ? "bg-ink" : "bg-rule"
                   }`}
                 />
               )}
               <span
-                className={`z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                className={`z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 font-display text-lg font-semibold ${
                   state === "current"
-                    ? "bg-gradient-to-br from-indigo-400 to-violet-500 text-white shadow-lg shadow-indigo-500/50 ring-4 ring-indigo-400/20"
+                    ? "border-ink bg-ink text-paper shadow-[3px_3px_0_0_var(--color-accent)]"
                     : state === "done"
-                      ? "bg-indigo-500 text-white"
-                      : "border-2 border-white/25 bg-transparent text-slate-400"
+                      ? "border-ink bg-ink text-paper"
+                      : "border-rule bg-paper text-muted"
                 }`}
               >
                 {state === "done" ? <Check /> : s.n}
               </span>
-              <div className={state === "todo" ? "opacity-60" : ""}>
-                <p className={`font-semibold ${state === "current" ? "text-white" : "text-slate-200"}`}>
+              <div className={state === "todo" ? "opacity-70" : ""}>
+                <p className={`font-display text-lg font-semibold leading-tight ${state === "todo" ? "text-ink-2" : "text-ink"}`}>
                   {s.title}
                 </p>
-                <p className="mt-0.5 text-sm text-slate-400">{s.body}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-2">{s.body}</p>
               </div>
             </li>
           );

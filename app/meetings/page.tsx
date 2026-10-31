@@ -1,9 +1,8 @@
 import Link from "next/link";
-import Photo from "@/components/Photo";
 import ResetDemoButton from "@/components/ResetDemoButton";
 import StartDemoButton from "@/components/StartDemoButton";
 import { sourceLabel } from "@/lib/format";
-import { btn, card, sectionLabelDark } from "@/lib/ui";
+import { btn, card, sectionLabel } from "@/lib/ui";
 import { getActiveDecisions, listMeetings } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +13,10 @@ export default function MeetingsPage() {
 
   return (
     <div className="space-y-12">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-ink pb-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Meetings</h1>
-          <p className="mt-1 text-sm text-slate-300">Everything you’ve confirmed so far.</p>
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Meetings</h1>
+          <p className="mt-1 text-sm text-ink-2">Everything you’ve confirmed so far.</p>
         </div>
         <div className="flex gap-2">
           <ResetDemoButton />
@@ -28,31 +27,28 @@ export default function MeetingsPage() {
       </div>
 
       <section>
-        <h2 className={`mb-3 ${sectionLabelDark}`}>All meetings</h2>
+        <h2 className={`mb-3 ${sectionLabel}`}>All meetings</h2>
         {meetings.length === 0 ? (
-          <div className="relative overflow-hidden rounded-2xl border border-white/10">
-            <Photo name="meeting" width={1000} className="absolute inset-0 h-full w-full opacity-40" />
-            <div className="relative bg-gradient-to-t from-[#060a18]/90 to-[#060a18]/50 p-10 text-center">
-              <p className="text-lg font-semibold text-white">No meetings yet</p>
-              <p className="mt-1 text-sm text-slate-300">Start the guided demo, or add your own meeting.</p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                <StartDemoButton />
-                <Link href="/meetings/new" className={btn.glass}>
-                  Add a meeting
-                </Link>
-              </div>
+          <div className={`${card} p-10 text-center`}>
+            <p className="font-display text-xl font-semibold">No meetings yet</p>
+            <p className="mt-1 text-sm text-ink-2">Try the demo, or add your own meeting.</p>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <StartDemoButton />
+              <Link href="/meetings/new" className={btn.secondary}>
+                Add a meeting
+              </Link>
             </div>
           </div>
         ) : (
-          <ul className={`${card} divide-y divide-slate-100`}>
+          <ul className={`${card} divide-y divide-rule`}>
             {meetings.map((m) => (
               <li key={m.id}>
                 <Link
                   href={`/meetings/${m.id}`}
-                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-4 transition hover:bg-indigo-50"
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-4 transition hover:bg-mark/30"
                 >
-                  <span className="font-semibold text-slate-900">{m.title}</span>
-                  <span className="text-sm text-slate-500">
+                  <span className="font-display text-lg font-semibold">{m.title}</span>
+                  <span className="text-sm text-muted">
                     {m.held_on} · {sourceLabel(m.source)}
                   </span>
                 </Link>
@@ -63,18 +59,18 @@ export default function MeetingsPage() {
       </section>
 
       <section>
-        <h2 className={sectionLabelDark}>Active decisions</h2>
-        <p className="mb-3 mt-1 text-sm text-slate-300">
+        <h2 className={sectionLabel}>Active decisions</h2>
+        <p className="mb-3 mt-1 text-sm text-ink-2">
           The team’s memory. Every new meeting is checked against this list.
         </p>
         {decisions.length === 0 ? (
-          <p className="text-sm text-slate-400">None yet. Decisions appear here after you confirm a meeting.</p>
+          <p className="text-sm text-muted">None yet. Decisions appear here after you confirm a meeting.</p>
         ) : (
-          <ul className="grid gap-3 md:grid-cols-2">
+          <ul className="grid gap-4 md:grid-cols-2">
             {decisions.map((d) => (
-              <li key={d.id} className={`${card} px-5 py-4`}>
-                <p className="text-sm font-medium text-slate-900">{d.text}</p>
-                <p className="mt-1 text-xs text-slate-500">
+              <li key={d.id} className={`${card} border-l-4 border-l-ink px-5 py-4`}>
+                <p className="font-medium">{d.text}</p>
+                <p className="mt-1 text-xs text-muted">
                   {d.meeting_title} · {d.held_on}
                 </p>
               </li>

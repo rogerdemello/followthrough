@@ -1,71 +1,61 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-paper: #f6f1e7;
+  --color-paper-2: #ece4d2;
+  --color-card: #fffdf8;
+  --color-ink: #1b1a17;
+  --color-ink-2: #4a463e;
+  --color-muted: #7a7366;
+  --color-rule: #d8cfbb;
+  --color-accent: #d6452a;
+  --color-accent-soft: #fbe6df;
+  --color-mark: #f4dc6b;
+  --color-ok: #2e6b4b;
+  --color-ok-soft: #dfece3;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-hand: var(--font-caveat), cursive;
+}
+
 html {
-  color-scheme: dark;
+  color-scheme: light;
   scroll-behavior: smooth;
 }
 
 body {
-  background: #060a18;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
-@keyframes word-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.35em);
-    filter: blur(4px);
-  }
+/* A highlighter stroke that draws itself in behind a word. */
+.marker {
+  color: inherit;
+  background-color: transparent;
+  padding: 0 0.12em;
+  background-image: linear-gradient(
+    transparent 58%,
+    var(--color-mark) 58%,
+    var(--color-mark) 92%,
+    transparent 92%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  animation: marker-draw 0.9s 0.5s ease-out forwards;
+}
+
+@keyframes marker-draw {
   to {
-    opacity: 1;
-    transform: none;
-    filter: none;
+    background-size: 100% 100%;
   }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes shine {
-  to {
-    background-position: 200% center;
-  }
-}
-
-.animate-word-in {
-  animation: word-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.float-a {
-  animation: float 6s ease-in-out infinite;
-}
-.float-b {
-  animation: float 7.5s ease-in-out -2s infinite;
-}
-.float-c {
-  animation: float 6.8s ease-in-out -4s infinite;
-}
-
-.shine-text {
-  background-size: 200% auto;
-  animation: shine 6s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .animate-word-in,
-  .float-a,
-  .float-b,
-  .float-c,
-  .shine-text {
+  .marker {
     animation: none;
+    background-size: 100% 100%;
   }
 }

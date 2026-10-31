@@ -44,7 +44,7 @@ function plural(n: number, word: string) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-2">{label}</span>
       {children}
     </label>
   );
@@ -53,11 +53,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function StepHeader({ step, title, body }: { step: number; title: string; body?: string }) {
   return (
     <header className="mb-6">
-      <p className="hidden text-xs font-semibold uppercase tracking-wider text-indigo-600 lg:block">
+      <p className="hidden text-sm font-semibold text-accent lg:block">
         Step {step} of 3
       </p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-      {body && <p className="mt-1 text-sm text-slate-600">{body}</p>}
+      <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">{title}</h1>
+      {body && <p className="mt-1 text-sm text-ink-2">{body}</p>}
     </header>
   );
 }
@@ -81,23 +81,23 @@ function Choice({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`rounded-lg border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+      className={`rounded-md border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         selected
-          ? "border-indigo-600 bg-white ring-2 ring-indigo-200"
-          : "border-slate-300 bg-white/70 hover:border-slate-400"
+          ? "border-ink bg-card shadow-[3px_3px_0_0_var(--color-accent)]"
+          : "border-ink/25 bg-white/70 hover:border-ink/50"
       }`}
     >
-      <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+      <span className="flex items-center gap-2 text-sm font-semibold text-ink">
         <span
           aria-hidden
           className={`h-4 w-4 shrink-0 rounded-full border-2 ${
-            selected ? "border-indigo-600 bg-indigo-600 shadow-[inset_0_0_0_2px_white]" : "border-slate-400"
+            selected ? "border-ink bg-ink shadow-[inset_0_0_0_2px_var(--color-card)]" : "border-ink/50"
           }`}
         />
         {title}
       </span>
-      <span className="mt-1 block text-xs text-slate-500">{meta}</span>
-      <span className="mt-1 block text-sm text-slate-800">“{text}”</span>
+      <span className="mt-1 block text-xs text-muted">{meta}</span>
+      <span className="mt-1 block text-sm text-ink">“{text}”</span>
     </button>
   );
 }
@@ -278,7 +278,7 @@ export default function NewMeetingPage() {
     content = (
       <div>
         <div
-          className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
+          className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-ok bg-ok-soft text-ok"
           aria-hidden
         >
           <svg viewBox="0 0 20 20" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -297,11 +297,11 @@ export default function NewMeetingPage() {
             {result.actions.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 px-4 py-3 text-sm"
+                className="flex items-center justify-between gap-4 rounded-md border border-rule px-4 py-3 text-sm"
               >
                 <div>
-                  <p className="font-medium text-slate-900">{a.text}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="font-medium text-ink">{a.text}</p>
+                  <p className="text-xs text-muted">
                     {a.owner ?? "Unassigned"} · due {a.due_on ?? "no date"}
                   </p>
                 </div>
@@ -318,8 +318,8 @@ export default function NewMeetingPage() {
           </ul>
         )}
         {streak > 0 && (
-          <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            🔥 <span className="font-semibold">{streak}-day streak.</span> Come back tomorrow with the next
+          <p className="mt-5 rounded-md border border-accent bg-accent-soft px-4 py-3 text-sm text-ink">
+            <span className="font-semibold">{streak} {streak === 1 ? "day" : "days"} in a row.</span> Come back tomorrow with the next
             recap to keep it going.
           </p>
         )}
@@ -349,16 +349,16 @@ export default function NewMeetingPage() {
         />
 
         {notice && (
-          <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          <p className="mb-4 rounded-md border border-rule bg-paper px-4 py-3 text-sm text-ink-2">
             {notice}
           </p>
         )}
         <div
           role="status"
-          className={`mb-8 rounded-lg border px-4 py-3 text-sm ${
+          className={`mb-8 rounded-md border px-4 py-3 text-sm ${
             conflictCount > 0
-              ? "border-amber-300 bg-amber-50 text-amber-900"
-              : "border-emerald-200 bg-emerald-50 text-emerald-900"
+              ? "border-accent bg-accent-soft text-ink"
+              : "border-ok/40 bg-ok-soft text-ok"
           }`}
         >
           {decisions.length === 0
@@ -372,13 +372,13 @@ export default function NewMeetingPage() {
 
         <section className="mb-10">
           <h2 className={sectionLabel}>Decisions</h2>
-          <p className="mb-3 mt-1 text-sm text-slate-600">What the group settled on in this meeting.</p>
-          {decisions.length === 0 && <p className="text-sm text-slate-500">No decisions found in this recap.</p>}
+          <p className="mb-3 mt-1 text-sm text-ink-2">What the group settled on in this meeting.</p>
+          {decisions.length === 0 && <p className="text-sm text-muted">No decisions found in this recap.</p>}
           <div className="space-y-3">
             {decisions.map((d, i) => {
               const first = d.conflicts[0];
               return (
-                <div key={i} className="rounded-lg border border-slate-200 p-4">
+                <div key={i} className="rounded-md border border-rule p-4">
                   <Field label="Decision">
                     <input
                       className={input}
@@ -387,16 +387,16 @@ export default function NewMeetingPage() {
                     />
                   </Field>
                   {first && (
-                    <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
-                      <p className="text-sm font-semibold text-amber-900">
-                        ⚠ {first.kind === "contradicts" ? "This contradicts an earlier decision" : "This changes an earlier decision"}
+                    <div className="mt-4 rounded-md border border-accent bg-accent-soft p-4">
+                      <p className="text-sm font-semibold text-ink">
+                        {first.kind === "contradicts" ? "This contradicts an earlier decision" : "This changes an earlier decision"}
                       </p>
                       {d.conflicts.map((c) => (
-                        <p key={c.old_decision_id} className="mt-0.5 text-sm text-amber-800">
+                        <p key={c.old_decision_id} className="mt-0.5 text-sm text-ink-2">
                           {c.reason}
                         </p>
                       ))}
-                      <p className="mb-2 mt-3 text-xs font-semibold uppercase tracking-wider text-amber-900">
+                      <p className="mb-2 mt-3 text-sm font-semibold text-ink">
                         Which one should stand?
                       </p>
                       <div role="radiogroup" aria-label="Which decision should stand" className="grid gap-2 sm:grid-cols-2">
@@ -425,15 +425,15 @@ export default function NewMeetingPage() {
 
         <section className="mb-10">
           <h2 className={sectionLabel}>Action items</h2>
-          <p className="mb-3 mt-1 text-sm text-slate-600">
+          <p className="mb-3 mt-1 text-sm text-ink-2">
             Tasks someone must do. Untick “Create task” to skip one.
           </p>
-          {actions.length === 0 && <p className="text-sm text-slate-500">No action items found in this recap.</p>}
+          {actions.length === 0 && <p className="text-sm text-muted">No action items found in this recap.</p>}
           <div className="space-y-3">
             {actions.map((a, i) => (
               <div
                 key={i}
-                className={`rounded-lg border border-slate-200 p-4 transition ${a.include ? "" : "bg-slate-50 opacity-60"}`}
+                className={`rounded-md border border-rule p-4 transition ${a.include ? "" : "bg-paper opacity-60"}`}
               >
                 <div className="grid gap-3 sm:grid-cols-[1fr_10rem_9.5rem]">
                   <Field label="Task">
@@ -460,14 +460,14 @@ export default function NewMeetingPage() {
                     />
                   </Field>
                 </div>
-                <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2 text-xs text-slate-500">
+                <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2 text-xs text-muted">
                   <p className="max-w-lg">
-                    <span className="font-medium text-slate-600">From your recap:</span> “{a.evidence}”
+                    <span className="font-medium text-ink-2">From your recap:</span> “{a.evidence}”
                   </p>
-                  <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-slate-700">
+                  <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-ink-2">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 accent-indigo-600"
+                      className="h-4 w-4 accent-ink"
                       checked={a.include}
                       onChange={(e) => updateAction(i, { include: e.target.checked })}
                     />
@@ -482,7 +482,7 @@ export default function NewMeetingPage() {
         {assumptions.length > 0 && (
           <section className="mb-10">
             <h2 className={`mb-2 ${sectionLabel}`}>Please double-check</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+            <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
               {assumptions.map((s, i) => (
                 <li key={i}>{s}</li>
               ))}
@@ -491,17 +491,17 @@ export default function NewMeetingPage() {
         )}
 
         {error && (
-          <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">
+          <p role="alert" className="mb-4 rounded-md bg-accent-soft p-3 text-sm text-accent">
             {error}
           </p>
         )}
         {nothingToSave && (
-          <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+          <p className="mb-4 rounded-md border border-rule bg-paper p-3 text-sm text-ink-2">
             There is nothing to save yet. Go back and add more detail about what was decided or who will do what.
           </p>
         )}
 
-        <div className="sticky bottom-0 -mx-5 -mb-5 mt-6 rounded-b-xl border-t border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:-mb-8 sm:px-8">
+        <div className="sticky bottom-0 -mx-5 -mb-5 mt-6 rounded-b-xl border-t border-rule bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:-mb-8 sm:px-8">
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={confirm} disabled={loading || nothingToSave} className={btn.primary}>
               {loading && <Spinner />}
@@ -521,7 +521,7 @@ export default function NewMeetingPage() {
             </button>
           </div>
           {meta.tracker && !nothingToSave && (
-            <p className="mt-2 text-xs text-slate-500">Tasks will be created in {meta.tracker}.</p>
+            <p className="mt-2 text-xs text-muted">Tasks will be created in {meta.tracker}.</p>
           )}
         </div>
       </div>
@@ -530,9 +530,9 @@ export default function NewMeetingPage() {
     // Step 1, waiting on the model
     content = (
       <div className="flex flex-col items-center py-16 text-center" role="status" aria-live="polite">
-        <Spinner className="h-8 w-8 text-indigo-600" />
-        <p className="mt-5 text-lg font-semibold text-slate-900">{ANALYZING_MESSAGES[messageIndex]}</p>
-        <p className="mt-1 text-sm text-slate-500">This usually takes about 10 seconds.</p>
+        <Spinner className="h-8 w-8 text-accent" />
+        <p className="mt-5 text-lg font-semibold text-ink">{ANALYZING_MESSAGES[messageIndex]}</p>
+        <p className="mt-1 text-sm text-muted">This usually takes about 10 seconds.</p>
       </div>
     );
   } else {
@@ -546,7 +546,7 @@ export default function NewMeetingPage() {
         />
 
         {demoMode && (
-          <div className="mb-6 rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+          <div className="mb-6 rounded-md border border-ink/20 bg-mark/40 p-4 text-sm text-ink">
             <p className="font-semibold">Demo mode</p>
             <p className="mt-0.5">
               Monday’s meeting (beta on Nov 15, payments with Stripe) is already saved. This recap
@@ -564,9 +564,9 @@ export default function NewMeetingPage() {
             onChange={(e) => setRawText(e.target.value)}
           />
         </Field>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-muted">
           Tip: talk naturally. “Um”, “uh” and “Thursday, no wait, Friday” are handled.{" "}
-          <button type="button" onClick={loadSample} className="font-medium text-indigo-700 underline">
+          <button type="button" onClick={loadSample} className="font-medium text-ink underline">
             Load a sample recap
           </button>
         </p>
@@ -592,13 +592,13 @@ export default function NewMeetingPage() {
               </select>
             </Field>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted">
             The date matters: “by Friday” is worked out relative to it.
           </p>
         </div>
 
         {error && (
-          <p role="alert" className="mt-6 rounded-lg bg-red-50 p-3 text-sm text-red-800">
+          <p role="alert" className="mt-6 rounded-md bg-accent-soft p-3 text-sm text-accent">
             {error}
           </p>
         )}
@@ -608,7 +608,7 @@ export default function NewMeetingPage() {
             Continue to review →
           </button>
           {!canExtract && (
-            <p className="text-xs text-slate-500">Add a title and a few words of recap to continue.</p>
+            <p className="text-xs text-muted">Add a title and a few words of recap to continue.</p>
           )}
         </div>
       </div>
@@ -620,7 +620,7 @@ export default function NewMeetingPage() {
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Stepper current={step} />
       </aside>
-      <div className={`${card} p-5 shadow-2xl shadow-indigo-500/10 sm:p-8`}>{content}</div>
+      <div className={`${card} p-5 sm:p-8`}>{content}</div>
     </div>
   );
 }

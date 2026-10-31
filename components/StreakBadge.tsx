@@ -22,21 +22,17 @@ export default function StreakBadge() {
   const streak = useStreak();
   if (streak === 0) {
     return (
-      <span
-        className="hidden text-xs text-slate-400 md:inline"
-        title="Confirm a meeting each day to build a streak"
-      >
+      <span className="hidden text-xs text-muted lg:inline" title="Confirm a meeting each day to build a streak">
         Recap today to start a streak
       </span>
     );
   }
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-200"
+      className="rounded-md border border-ink/25 bg-mark/60 px-2.5 py-1 text-xs font-semibold text-ink"
       title="Confirm a meeting each day to keep your streak alive"
     >
-      <span aria-hidden>🔥</span>
-      {streak}-day streak
+      {streak} {streak === 1 ? "day" : "days"} in a row
     </span>
   );
 }

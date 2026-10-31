@@ -1,42 +1,18 @@
 import Link from "next/link";
-import GlowCard from "@/components/GlowCard";
 import Photo from "@/components/Photo";
+import Print from "@/components/Print";
 import Reveal from "@/components/Reveal";
 import ReturningOnly from "@/components/ReturningOnly";
-import RotatingWord from "@/components/RotatingWord";
 import StartDemoButton from "@/components/StartDemoButton";
 import WelcomeBack from "@/components/WelcomeBack";
 import type { PhotoKey } from "@/lib/photos";
 import { STEPS } from "@/lib/steps";
-import { btn, glass } from "@/lib/ui";
+import { card } from "@/lib/ui";
 import { getActiveDecisions, getAllOpenActions, listMeetings } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 const STEP_PHOTOS: PhotoKey[] = ["speak", "review", "confirm"];
-
-function Tile({ value, label, href }: { value: number; label: string; href: string }) {
-  return (
-    <Link href={href} className="block">
-      <GlowCard className="p-5">
-        <p className="bg-gradient-to-r from-indigo-200 to-cyan-200 bg-clip-text text-4xl font-bold text-transparent">
-          {value}
-        </p>
-        <p className="mt-1 text-sm text-slate-300">{label}</p>
-      </GlowCard>
-    </Link>
-  );
-}
-
-function Chip({ className, children }: { className: string; children: React.ReactNode }) {
-  return (
-    <div
-      className={`absolute z-10 max-w-[15rem] rounded-xl border border-white/15 bg-[#0b1226]/80 px-3 py-2 text-xs font-medium text-white shadow-xl shadow-black/40 backdrop-blur-md sm:text-sm ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 export default function Home() {
   const meetings = listMeetings().length;
@@ -51,87 +27,68 @@ export default function Home() {
       </ReturningOnly>
 
       {/* Hero */}
-      <section className="grid items-center gap-12 pb-20 pt-4 lg:grid-cols-[1.05fr_1fr] lg:pt-10">
+      <section className="grid items-center gap-14 pb-24 pt-4 lg:grid-cols-[1.1fr_1fr] lg:pt-10">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-indigo-100 backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-            Meeting-to-execution agent
+          <p className="flex items-center gap-2 text-sm font-medium text-ink-2">
+            <span aria-hidden className="inline-block h-2 w-2 bg-accent" />
+            A follow-through tool for meetings
           </p>
-          <h1 className="mt-5 text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
-            Never lose another <RotatingWord words={["decision", "promise", "deadline", "owner", "follow-up"]} />{" "}
-            from a meeting
+          <h1 className="mt-4 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-7xl">
+            Meetings end. The <mark className="marker">promises</mark> shouldn’t.
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-300">
-            Speak a messy recap. Followthrough pulls out who does what by when, and warns you the moment a
-            new meeting quietly reverses an old decision.
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-2">
+            Talk through what happened, the way you’d tell a colleague. Followthrough writes down who’s doing
+            what by when, and tells you when today’s meeting quietly undoes last week’s.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <StartDemoButton large />
-            <Link href="/meetings/new" className={`${btn.glass} ${btn.large}`}>
-              Use your own meeting
+            <Link href="/meetings/new" className="text-sm font-semibold underline decoration-accent decoration-2 underline-offset-4 hover:bg-mark/50">
+              or use your own meeting →
             </Link>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-300">
-            {["About 2 minutes to try", "Catches contradictions", "Nothing saved until you confirm"].map((t) => (
-              <li key={t} className="flex items-center gap-2">
-                <svg viewBox="0 0 20 20" className="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-                  <path d="M4 10.5l4 4 8-9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {t}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-4 text-sm text-muted">Nothing is saved until you say so.</p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-          <div aria-hidden className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-tr from-indigo-500/40 via-fuchsia-500/25 to-cyan-400/30 blur-2xl" />
-          <div className="relative overflow-hidden rounded-3xl border border-white/15 shadow-2xl shadow-black/50">
-            <Photo name="hero" width={1100} priority className="aspect-[4/3] w-full" />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#060a18]/70 via-transparent to-indigo-900/20" />
+        <div className="relative mx-auto w-full max-w-md pb-10 lg:max-w-none">
+          <Print name="hero" width={1000} priority caption="Planning, Monday morning" rotate="-2.5deg" className="relative max-w-lg" />
+          <Print
+            name="meeting"
+            width={600}
+            rotate="3deg"
+            tape={false}
+            className="absolute -bottom-6 right-0 hidden w-44 sm:block"
+          />
+          <div
+            className="absolute -left-2 bottom-2 w-52 rotate-[-4deg] bg-mark p-3 shadow-[0_10px_20px_-10px_rgba(27,26,23,0.5)] sm:-left-6"
+            aria-hidden
+          >
+            <p className="font-hand text-xl leading-tight text-ink">“Thursday… no wait, Friday.”</p>
+            <p className="mt-1 font-hand text-xl leading-tight text-accent">→ Fri 13 Nov. Got it.</p>
           </div>
-          <Chip className="float-a left-2 top-6 sm:-left-5">🎙 “Thursday… no wait, Friday”</Chip>
-          <Chip className="float-b right-2 top-[38%] border-amber-300/40 sm:-right-5">
-            ⚠ Conflict caught
-            <span className="block text-xs font-normal text-amber-200">Stripe → Razorpay</span>
-          </Chip>
-          <Chip className="float-c bottom-4 left-4 border-emerald-300/40 sm:-bottom-5 sm:left-8">
-            ✓ 3 tasks created
-            <span className="block text-xs font-normal text-emerald-200">First due Nov 13</span>
-          </Chip>
         </div>
       </section>
 
       {/* Guided path */}
-      <section aria-labelledby="how" className="pb-20">
+      <section aria-labelledby="how" className="border-t-2 border-ink pb-24 pt-10">
         <Reveal>
-          <h2 id="how" className="text-center text-3xl font-bold tracking-tight sm:text-4xl">
-            Three steps from talk to done
+          <h2 id="how" className="font-display text-4xl font-semibold tracking-tight">
+            How it works
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-center text-slate-300">
-            A guided path takes you through it. No setup, no training.
-          </p>
+          <p className="mt-2 max-w-xl text-ink-2">A guided path takes you through it. No setup, no training.</p>
         </Reveal>
-        <ol className="mt-10 grid gap-6 md:grid-cols-3">
+        <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-0">
           {STEPS.map((s, i) => (
-            <li key={s.n}>
-              <Reveal delay={i * 120} className="h-full">
-                <GlowCard className="h-full">
-                  <div className="relative h-44 overflow-hidden">
-                    <Photo name={STEP_PHOTOS[i]} width={700} className="h-full w-full" />
-                    <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0b1226] via-[#0b1226]/20 to-transparent" />
-                    <span className="absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 text-sm font-bold text-white shadow-lg">
-                      {s.n}
-                    </span>
-                  </div>
-                  <div className="p-6 pt-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Step {s.n}</p>
-                    <h3 className="mt-1 text-xl font-semibold text-white">{s.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-300">{s.body}</p>
-                  </div>
-                </GlowCard>
+            <li key={s.n} className={`md:px-6 ${i > 0 ? "md:border-l md:border-rule" : "md:pl-0"}`}>
+              <Reveal delay={i * 120}>
+                <div className="flex items-end gap-3">
+                  <span className="font-display text-6xl font-semibold italic leading-none text-accent">{s.n}</span>
+                  <span className="mb-1 text-sm font-medium text-muted">Step {s.n}</span>
+                </div>
+                <div className="relative mt-4 overflow-hidden border border-ink/15">
+                  <Photo name={STEP_PHOTOS[i]} width={700} className="aspect-[4/3] w-full" />
+                </div>
+                <h3 className="mt-4 font-display text-2xl font-semibold leading-tight">{s.title}</h3>
+                <p className="mt-2 leading-relaxed text-ink-2">{s.body}</p>
               </Reveal>
             </li>
           ))}
@@ -139,52 +96,55 @@ export default function Home() {
       </section>
 
       {/* Demo showcase */}
-      <section className="pb-20">
+      <section className="pb-24">
         <Reveal>
-          <div className={`${glass} overflow-hidden`}>
-            <div className="grid md:grid-cols-2">
-              <div className="p-8 sm:p-10">
-                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-300">The 2-minute demo</p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight">Watch it catch a reversal</h2>
-                <p className="mt-3 leading-relaxed text-slate-300">
-                  Monday’s meeting is already saved: the beta launches on Nov 15 and payments use Stripe. You
-                  then speak a messy Thursday recap. Followthrough cleans it up and flags both decisions it
-                  reverses before anything is saved.
-                </p>
-                <div className="mt-6">
-                  <StartDemoButton />
-                </div>
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <h2 className="font-display text-4xl font-semibold leading-tight tracking-tight">
+                Watch it catch a reversal
+              </h2>
+              <p className="mt-4 max-w-md leading-relaxed text-ink-2">
+                Monday’s meeting is already saved: the beta launches on Nov 15 and payments use Stripe. You then
+                speak a messy Thursday recap. Followthrough cleans it up and flags both decisions it reverses,
+                before anything is saved.
+              </p>
+              <div className="mt-6">
+                <StartDemoButton />
               </div>
-              <div className="border-t border-white/10 bg-black/20 p-8 sm:p-10 md:border-l md:border-t-0" aria-hidden>
-                <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">⚠ Conflict found</p>
-                <div className="mt-4 space-y-3 text-sm">
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-slate-400">Earlier · Product sync, Oct 26</p>
-                    <p className="mt-1 text-white">Use Stripe as the payments provider</p>
-                  </div>
-                  <p className="text-center text-xs text-slate-500">is now contradicted by</p>
-                  <div className="rounded-xl border border-amber-300/40 bg-amber-300/10 p-4">
-                    <p className="text-xs text-amber-200">New · this recap</p>
-                    <p className="mt-1 text-white">Payments provider switched from Stripe to Razorpay</p>
-                  </div>
-                </div>
-              </div>
+            </div>
+            <div className={`${card} p-6 sm:p-8`} aria-hidden>
+              <p className="text-sm font-medium text-muted">Product sync · Oct 26</p>
+              <p className="mt-2 font-display text-2xl leading-snug">
+                Use <span className="text-muted line-through decoration-accent decoration-2">Stripe</span>{" "}
+                <span className="bg-mark px-1">Razorpay</span> as the payments provider
+              </p>
+              <p className="mt-5 border-l-2 border-accent bg-accent-soft py-2 pl-3 pr-2 text-sm text-ink">
+                <span className="font-semibold">Conflict.</span> Thursday’s recap switches payments from Stripe to
+                Razorpay. Which one should stand?
+              </p>
             </div>
           </div>
         </Reveal>
       </section>
 
       {meetings > 0 && (
-        <section aria-labelledby="ws">
+        <section aria-labelledby="ws" className="border-t border-rule pb-6 pt-8">
           <Reveal>
-            <h2 id="ws" className="mb-4 text-xs font-semibold uppercase tracking-wider text-indigo-200/80">
-              Live snapshot of your workspace
+            <h2 id="ws" className="font-display text-xl font-semibold">
+              Right now in this workspace
             </h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Tile value={meetings} label={meetings === 1 ? "meeting saved" : "meetings saved"} href="/meetings" />
-              <Tile value={decisions} label="active decisions" href="/meetings" />
-              <Tile value={open.length} label="open tasks" href="/digest" />
-            </div>
+            <dl className="mt-4 grid max-w-xl grid-cols-3 gap-6">
+              {[
+                { v: meetings, l: meetings === 1 ? "meeting" : "meetings", href: "/meetings" },
+                { v: decisions, l: "active decisions", href: "/meetings" },
+                { v: open.length, l: "open tasks", href: "/digest" },
+              ].map((t) => (
+                <Link key={t.l} href={t.href} className="group block">
+                  <dd className="font-display text-5xl font-semibold group-hover:text-accent">{t.v}</dd>
+                  <dt className="text-sm text-ink-2 underline-offset-4 group-hover:underline">{t.l}</dt>
+                </Link>
+              ))}
+            </dl>
           </Reveal>
         </section>
       )}

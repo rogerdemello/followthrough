@@ -1,26 +1,21 @@
 // Shared class strings so every screen uses the same buttons, cards and inputs.
+// Palette and fonts live in app/globals.css (@theme).
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50";
 
 export const btn = {
-  primary: `${buttonBase} bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30 hover:from-indigo-400 hover:to-violet-400 hover:shadow-indigo-500/50`,
-  secondary: `${buttonBase} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50`,
-  /** For use on the dark background. */
-  glass: `${buttonBase} border border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/20`,
-  ghost: `${buttonBase} text-slate-600 hover:bg-slate-100`,
+  primary: `${buttonBase} bg-ink text-paper shadow-[3px_3px_0_0_var(--color-accent)] hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_var(--color-accent)] active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_var(--color-accent)]`,
+  secondary: `${buttonBase} border border-ink bg-card text-ink hover:bg-paper-2`,
+  ghost: `${buttonBase} text-ink-2 hover:bg-paper-2`,
   large: "px-6 py-3 text-base",
 };
 
-/** White surface for forms, tables and anything dense. */
-export const card = "rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-lg shadow-black/10";
-
-/** Dark frosted surface for marketing and summary content. */
-export const glass =
-  "rounded-2xl border border-white/10 bg-white/[0.05] text-white shadow-xl shadow-black/20 backdrop-blur-md";
+/** Flat paper card with a hard offset shadow. */
+export const card = "rounded-md border border-ink/15 bg-card text-ink shadow-[4px_4px_0_0_var(--color-rule)]";
 
 export const input =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200";
+  "w-full rounded-md border border-ink/25 bg-card px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/30";
 
-export const sectionLabel = "text-xs font-semibold uppercase tracking-wider text-slate-500";
-export const sectionLabelDark = "text-xs font-semibold uppercase tracking-wider text-indigo-200/80";
+/** Section heading in the serif face. */
+export const sectionLabel = "font-display text-xl font-semibold text-ink";
