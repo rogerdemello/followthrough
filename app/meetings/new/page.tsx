@@ -590,7 +590,7 @@ export default function NewMeetingPage() {
       <div className="flex flex-col items-center py-16 text-center" role="status" aria-live="polite">
         <Spinner className="h-8 w-8 text-accent" />
         <p className="mt-5 text-lg font-semibold text-ink">{ANALYZING_MESSAGES[messageIndex]}</p>
-        <p className="mt-1 text-sm text-muted">This usually takes about 10 seconds.</p>
+        <p className="mt-1 text-sm text-muted">Usually just a few seconds.</p>
       </div>
     );
   } else {
