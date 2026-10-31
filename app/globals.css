@@ -20,7 +20,6 @@
 
 html {
   color-scheme: light;
-  scroll-behavior: smooth;
   /* Everything is sized in rem, so this scales the whole interface to 90%. */
   font-size: 90%;
 }
@@ -60,4 +59,19 @@ body {
     animation: none;
     background-size: 100% 100%;
   }
+}
+
+/* Lenis smooth wheel scrolling (recommended base styles). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+[data-lenis-prevent] {
+  overscroll-behavior: contain;
 }

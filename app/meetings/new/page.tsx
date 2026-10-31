@@ -634,6 +634,7 @@ export default function NewMeetingPage() {
 
         <Field label="What was said">
           <textarea
+            data-lenis-prevent
             className={`${input} h-56 leading-relaxed`}
             placeholder="Click here and start talking, or paste your transcript…"
             value={rawText}

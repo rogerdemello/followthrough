@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, Fraunces, Instrument_Sans } from "next/font/google";
 import BackgroundFX from "@/components/BackgroundFX";
 import Nav from "@/components/Nav";
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
 const display = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${sans.variable} ${hand.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-paper font-sans text-ink antialiased">
         <BackgroundFX />
+        <SmoothScroll />
         <header className="sticky top-0 z-30 border-b border-ink/15 bg-paper">
           <Nav />
         </header>
