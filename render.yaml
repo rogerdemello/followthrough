@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: followthrough
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      # node:sqlite needs Node 22.5 or newer
+      - key: NODE_VERSION
+        value: 24
+      # Free disks are wiped on restart; reload the demo data when that happens
+      - key: SEED_ON_EMPTY
+        value: "1"
+      - key: LLM_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
+      - key: LLM_MODEL
+        value: gemini-2.5-flash
+      # Set this in the Render dashboard; never commit it
+      - key: LLM_API_KEY
+        sync: false
