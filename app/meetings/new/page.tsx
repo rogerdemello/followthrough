@@ -376,7 +376,7 @@ export default function NewMeetingPage() {
           </ul>
         )}
         {streak > 0 && (
-          <p className="mt-5 rounded-md border border-accent bg-accent-soft px-4 py-3 text-sm text-ink">
+          <p className="mt-5 rounded-md border border-ink/20 bg-mark/50 px-4 py-3 text-sm text-ink">
             <span className="font-semibold">{streak} {streak === 1 ? "day" : "days"} in a row.</span> Come back tomorrow with the next
             recap to keep it going.
           </p>
