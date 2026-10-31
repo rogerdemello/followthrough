@@ -49,7 +49,7 @@ export default function Home() {
           <p className="mt-4 text-sm text-muted">Nothing is saved until you say so.</p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-md pb-10 lg:max-w-none">
+        <div className="relative mx-auto w-full max-w-md pb-16 lg:max-w-none">
           <Print name="hero" width={1000} priority caption="Planning, Monday morning" rotate="-2.5deg" className="relative max-w-lg" />
           <Print
             name="meeting"
@@ -59,7 +59,7 @@ export default function Home() {
             className="absolute -bottom-6 right-0 hidden w-44 sm:block"
           />
           <div
-            className="absolute -left-2 bottom-2 w-52 rotate-[-4deg] bg-mark p-3 shadow-[0_10px_20px_-10px_rgba(27,26,23,0.5)] sm:-left-6"
+            className="absolute -bottom-10 -left-2 w-52 rotate-[-4deg] bg-mark p-3 shadow-[0_10px_20px_-10px_rgba(27,26,23,0.5)] sm:-left-6"
             aria-hidden
           >
             <p className="font-hand text-xl leading-tight text-ink">“Thursday… no wait, Friday.”</p>

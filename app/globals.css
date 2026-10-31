@@ -21,6 +21,8 @@
 html {
   color-scheme: light;
   scroll-behavior: smooth;
+  /* Everything is sized in rem, so this scales the whole interface to 90%. */
+  font-size: 90%;
 }
 
 body {
