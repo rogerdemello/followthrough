@@ -31,7 +31,7 @@ For each new decision, check it against each earlier decision on the same subjec
 - "consistent": no conflict.
 
 Only return pairs that are about the same subject. Skip unrelated pairs.
-reason: one short sentence that names the earlier choice and what changed.`;
+reason: one short sentence that names the earlier choice and what changed. Use only facts that appear in the decision texts. Copy dates, names and numbers exactly as written in the earlier decision; never guess or infer a value that is not written there. If unsure of a detail, leave it out.`;
 
 /** Returns, per new-decision index, the earlier decisions it conflicts with. */
 export async function detectConflicts(
