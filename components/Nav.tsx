@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import StreakBadge from "@/components/StreakBadge";
 import { btn } from "@/lib/ui";
 
 export default function Nav() {
@@ -16,10 +17,13 @@ export default function Nav() {
     { href: "/digest", label: "Digest", active: pathname === "/digest" },
   ];
   return (
-    <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-      <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-2 text-base font-semibold text-slate-900">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white" aria-hidden>
+    <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      <div className="flex items-center gap-5">
+        <Link href="/" className="flex items-center gap-2 text-base font-semibold text-white">
+          <span
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-white shadow-lg shadow-indigo-500/40"
+            aria-hidden
+          >
             <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M4 10.5l4 4 8-9" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -32,10 +36,10 @@ export default function Nav() {
               key={l.href}
               href={l.href}
               aria-current={l.active ? "page" : undefined}
-              className={`whitespace-nowrap py-1 ${
+              className={`whitespace-nowrap border-b-2 py-1 transition ${
                 l.active
-                  ? "border-b-2 border-indigo-600 font-medium text-slate-900"
-                  : "border-b-2 border-transparent text-slate-600 hover:text-slate-900"
+                  ? "border-indigo-400 font-medium text-white"
+                  : "border-transparent text-slate-300 hover:text-white"
               }`}
             >
               {l.label}
@@ -43,9 +47,12 @@ export default function Nav() {
           ))}
         </div>
       </div>
-      <Link href="/meetings/new" className={`${btn.primary} !px-3 !py-1.5 whitespace-nowrap`}>
-        New meeting
-      </Link>
+      <div className="flex items-center gap-3">
+        <StreakBadge />
+        <Link href="/meetings/new" className={`${btn.primary} !px-3.5 !py-1.5 whitespace-nowrap`}>
+          New meeting
+        </Link>
+      </div>
     </nav>
   );
 }

@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import RemindLink from "@/components/RemindLink";
 import Spinner from "@/components/Spinner";
+import { useStreak } from "@/components/StreakBadge";
 import Stepper from "@/components/Stepper";
 import TaskLink from "@/components/TaskLink";
+import { recordActivity } from "@/lib/streak";
 import type { ConfirmResult, ConflictInfo, Draft } from "@/lib/types";
 import { btn, card, input, sectionLabel } from "@/lib/ui";
 import { MEETING2 } from "@/seed/data";
@@ -100,6 +103,7 @@ function Choice({
 }
 
 export default function NewMeetingPage() {
+  const streak = useStreak();
   const [title, setTitle] = useState("");
   const [heldOn, setHeldOn] = useState(() => new Date().toISOString().slice(0, 10));
   const [source, setSource] = useState<Source>("dictated");
@@ -114,6 +118,7 @@ export default function NewMeetingPage() {
     earlierDecisions: 0,
     tracker: "",
   });
+  const [notice, setNotice] = useState<string | null>(null);
   const [speakers, setSpeakers] = useState<string[]>([]);
   const [assumptions, setAssumptions] = useState<string[]>([]);
   const [decisions, setDecisions] = useState<ReviewDecision[] | null>(null);
@@ -166,6 +171,7 @@ export default function NewMeetingPage() {
         source,
       });
       setMeta({ earlierDecisions: draft.earlierDecisions, tracker: draft.tracker });
+      setNotice(draft.notice ?? null);
       setSpeakers(draft.speakers);
       setAssumptions(draft.assumptions);
       setDecisions(draft.decisions.map((d) => ({ ...d, resolution: "replace" as Resolution })));
@@ -234,6 +240,7 @@ export default function NewMeetingPage() {
         aliasEdits,
       });
       setResult(res);
+      recordActivity();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       const reason = err instanceof Error ? err.message : "unknown error";
@@ -298,10 +305,23 @@ export default function NewMeetingPage() {
                     {a.owner ?? "Unassigned"} · due {a.due_on ?? "no date"}
                   </p>
                 </div>
-                <TaskLink url={a.tracker_url} />
+                <div className="flex shrink-0 flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                  <TaskLink url={a.tracker_url} />
+                  <RemindLink
+                    title={a.text}
+                    dueOn={a.due_on}
+                    details={`From ${title}. Owner: ${a.owner ?? "unassigned"}.`}
+                  />
+                </div>
               </li>
             ))}
           </ul>
+        )}
+        {streak > 0 && (
+          <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            🔥 <span className="font-semibold">{streak}-day streak.</span> Come back tomorrow with the next
+            recap to keep it going.
+          </p>
         )}
         <div className="mt-6 flex flex-wrap gap-2">
           <Link href="/digest" className={btn.primary}>
@@ -328,6 +348,11 @@ export default function NewMeetingPage() {
           }`}
         />
 
+        {notice && (
+          <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            {notice}
+          </p>
+        )}
         <div
           role="status"
           className={`mb-8 rounded-lg border px-4 py-3 text-sm ${
@@ -595,7 +620,7 @@ export default function NewMeetingPage() {
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Stepper current={step} />
       </aside>
-      <div className={`${card} p-5 sm:p-8`}>{content}</div>
+      <div className={`${card} p-5 shadow-2xl shadow-indigo-500/10 sm:p-8`}>{content}</div>
     </div>
   );
 }

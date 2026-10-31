@@ -1,16 +1,13 @@
 import Link from "next/link";
+import RemindLink from "@/components/RemindLink";
 import TaskLink from "@/components/TaskLink";
-import { card, sectionLabel } from "@/lib/ui";
+import { daysBetween, relativeDue } from "@/lib/format";
+import { btn, card, sectionLabelDark } from "@/lib/ui";
 import { getOpenActionsFor, getPeople, getSupersededDecisions, type ActionRow } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
-function daysBetween(fromISO: string, toISO: string): number {
-  const ms = new Date(`${toISO}T00:00:00Z`).getTime() - new Date(`${fromISO}T00:00:00Z`).getTime();
-  return Math.round(ms / 86_400_000);
-}
-
-function Group({ title, items, tone }: { title: string; items: ActionRow[]; tone: string }) {
+function Group({ title, items, tone, today }: { title: string; items: ActionRow[]; tone: string; today: string }) {
   if (items.length === 0) return null;
   return (
     <section>
@@ -19,14 +16,21 @@ function Group({ title, items, tone }: { title: string; items: ActionRow[]; tone
       </h2>
       <ul className="space-y-2">
         {items.map((a) => (
-          <li key={a.id} className={`${card} flex items-center justify-between gap-4 px-5 py-3 text-sm`}>
+          <li key={a.id} className={`${card} flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm`}>
             <div>
-              <p className="text-slate-900">{a.text}</p>
+              <p className="font-medium text-slate-900">{a.text}</p>
               <p className="mt-0.5 text-xs text-slate-500">
-                {a.meeting_title} · due {a.due_on ?? "no date"}
+                {a.meeting_title} · {a.due_on ? `${a.due_on} (${relativeDue(a.due_on, today).label})` : "no date"}
               </p>
             </div>
-            <TaskLink url={a.tracker_url} />
+            <div className="flex items-center gap-2">
+              <TaskLink url={a.tracker_url} />
+              <RemindLink
+                title={a.text}
+                dueOn={a.due_on}
+                details={`From ${a.meeting_title}. Owner: ${a.owner ?? "unassigned"}.`}
+              />
+            </div>
           </li>
         ))}
       </ul>
@@ -51,31 +55,28 @@ export default async function DigestPage({
   const changed = getSupersededDecisions();
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Weekly digest</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Weekly digest</h1>
+        <p className="mt-1 text-sm text-slate-300">
           Each person’s open tasks, grouped by urgency, plus the decisions that changed. Today is {today}.
         </p>
       </div>
 
       {people.length === 0 ? (
         <div className={`${card} p-8 text-center`}>
-          <p className="font-medium text-slate-900">No tasks yet</p>
+          <p className="font-semibold text-slate-900">No tasks yet</p>
           <p className="mt-1 text-sm text-slate-600">
             Confirm a meeting and each owner’s tasks will show up here.
           </p>
-          <Link
-            href="/meetings/new"
-            className="mt-4 inline-block text-sm font-medium text-indigo-700 underline"
-          >
+          <Link href="/meetings/new" className={`${btn.primary} mt-4`}>
             Add a meeting
           </Link>
         </div>
       ) : (
         <>
           <div>
-            <p className={`mb-2 ${sectionLabel}`}>Choose a person</p>
+            <p className={`mb-2 ${sectionLabelDark}`}>Choose a person</p>
             <div className="flex flex-wrap gap-2">
               {people.map((p) => (
                 <Link
@@ -83,8 +84,8 @@ export default async function DigestPage({
                   href={`/digest?person=${encodeURIComponent(p)}`}
                   className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                     p === selected
-                      ? "border-indigo-600 bg-indigo-600 text-white"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                      ? "border-transparent bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30"
+                      : "border-white/20 bg-white/10 text-slate-100 hover:bg-white/20"
                   }`}
                 >
                   {p}
@@ -93,23 +94,23 @@ export default async function DigestPage({
             </div>
           </div>
 
-          {open.length === 0 && <p className="text-sm text-slate-500">Nothing open for {selected}.</p>}
-          <Group title="Overdue" items={overdue} tone="text-red-700" />
-          <Group title="Due in the next 7 days" items={soon} tone="text-amber-700" />
-          <Group title="Later" items={later} tone="text-slate-500" />
+          {open.length === 0 && <p className="text-sm text-slate-300">Nothing open for {selected}. 🎉</p>}
+          <Group title="Overdue" items={overdue} tone="text-red-300" today={today} />
+          <Group title="Due in the next 7 days" items={soon} tone="text-amber-200" today={today} />
+          <Group title="Later" items={later} tone="text-slate-300" today={today} />
         </>
       )}
 
       <section>
-        <h2 className={`mb-3 ${sectionLabel}`}>Decisions that changed</h2>
+        <h2 className={`mb-3 ${sectionLabelDark}`}>Decisions that changed</h2>
         {changed.length === 0 ? (
-          <p className="text-sm text-slate-500">No decisions have been replaced yet.</p>
+          <p className="text-sm text-slate-400">No decisions have been replaced yet.</p>
         ) : (
           <ul className="space-y-2">
             {changed.map((d) => (
               <li key={d.id} className={`${card} px-5 py-3 text-sm`}>
                 <p className="text-slate-400 line-through">{d.text}</p>
-                {d.replaced_text && <p className="mt-1 text-slate-900">→ {d.replaced_text}</p>}
+                {d.replaced_text && <p className="mt-1 font-medium text-slate-900">→ {d.replaced_text}</p>}
                 <p className="mt-1 text-xs text-slate-500">
                   Originally decided in {d.meeting_title} on {d.held_on}
                 </p>

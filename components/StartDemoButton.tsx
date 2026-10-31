@@ -22,7 +22,7 @@ export default function StartDemoButton({ large = false }: { large?: boolean }) 
 
   return (
     <button onClick={start} disabled={busy} className={`${btn.primary} ${large ? btn.large : ""}`}>
-      {busy && <Spinner />}
+      {busy ? <Spinner /> : <span aria-hidden>▶</span>}
       {busy ? "Loading the demo…" : "Start the guided demo"}
     </button>
   );

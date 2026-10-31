@@ -23,6 +23,45 @@ Priya: Great. Let's also keep the beta invite-only for the first two weeks.`,
   ],
 };
 
+// A saved result for MEETING2, used only when the live model is unavailable (for example, out of free quota).
+export const MEETING2_SAVED = {
+  speakers: ["Rahul", "Meera", "Arjun"],
+  decisions: [
+    {
+      text: "Beta launch moved to December 1",
+      topic: "beta launch date",
+      kind: "supersedes" as const,
+      reason: "The earlier decision set the beta launch to November 15; it is now moved to December 1.",
+    },
+    {
+      text: "Payments provider switched from Stripe to Razorpay",
+      topic: "payments provider",
+      kind: "contradicts" as const,
+      reason: "The earlier decision chose Stripe as the payments provider; it is now switched to Razorpay.",
+    },
+  ],
+  actions: [
+    {
+      text: "Integrate Razorpay payments",
+      owner: "Rahul",
+      due_on: "2026-11-13",
+      evidence: "Rahul will own that, he'll have it done by, uh, Thursday, no wait, Friday the 13th of November.",
+    },
+    {
+      text: "Update onboarding screens for the new payment flow",
+      owner: "Meera",
+      due_on: "2026-11-18",
+      evidence: "Meera needs to update the onboarding screens for the new payment flow, that's by November 18th.",
+    },
+    {
+      text: "Move the launch announcement",
+      owner: "Arjun",
+      due_on: "2026-11-24",
+      evidence: "Arjun should move the launch announcement to the week of November 23rd, I'll say the 24th.",
+    },
+  ],
+};
+
 export const MEETING2 = {
   title: "Beta plan check-in",
   heldOn: "2026-10-29",

@@ -81,6 +81,10 @@ export function getOpenActionsFor(person: string): ActionRow[] {
   );
 }
 
+export function getAllOpenActions(): ActionRow[] {
+  return all<ActionRow>(`${ACTION_SELECT} WHERE a.status = 'open' ORDER BY a.due_on IS NULL, a.due_on, a.id`);
+}
+
 export function countOpenActions(): number {
   return one<{ n: number }>("SELECT COUNT(*) AS n FROM action_items WHERE status = 'open'")?.n ?? 0;
 }

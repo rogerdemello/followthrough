@@ -50,46 +50,65 @@ type ChatCompletion = {
   error?: { message?: string };
 };
 
+/** LLM_MODEL may list several models, comma separated. Each free model has its own daily quota. */
+function modelChain(): string[] {
+  return (process.env.LLM_MODEL ?? "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+}
+
 async function callOpenAICompatible(opts: CallToolOptions<unknown>): Promise<unknown> {
   const base = process.env.LLM_BASE_URL!.replace(/\/+$/, "");
-  let res: Response | null = null;
-  // Free tiers rate-limit and occasionally overload; retry briefly on 429/503.
-  for (let i = 0; i < 3; i++) {
-    res = await fetch(`${base}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.LLM_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.LLM_MODEL,
-        temperature: 0,
-        messages: [
-          { role: "system", content: opts.system },
-          { role: "user", content: opts.user },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: opts.toolName,
-              description: opts.toolDescription,
-              parameters: opts.inputSchema,
+  let lastError = "no model configured";
+
+  for (const model of modelChain()) {
+    // Overloaded (503): retry this model briefly. Out of quota (429): move to the next model.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await fetch(`${base}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.LLM_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0,
+          messages: [
+            { role: "system", content: opts.system },
+            { role: "user", content: opts.user },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: opts.toolName,
+                description: opts.toolDescription,
+                parameters: opts.inputSchema,
+              },
             },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: opts.toolName } },
-      }),
-    });
-    if (res.status !== 429 && res.status !== 503) break;
-    await new Promise((r) => setTimeout(r, 1500 * (i + 1)));
+          ],
+          tool_choice: { type: "function", function: { name: opts.toolName } },
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as ChatCompletion | ChatCompletion[];
+      const body = Array.isArray(data) ? data[0] : data;
+
+      if (res.ok) {
+        const args = body?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        if (args) return JSON.parse(args);
+        lastError = `${model} returned no structured answer`;
+        break;
+      }
+      lastError = `${model} (${res.status}): ${body?.error?.message?.split("\n")[0] ?? "unknown error"}`;
+      if (res.status === 503 && attempt === 0) {
+        await new Promise((r) => setTimeout(r, 1200));
+        continue;
+      }
+      break;
+    }
   }
-  const data = (await res!.json()) as ChatCompletion | ChatCompletion[];
-  const body = Array.isArray(data) ? data[0] : data;
-  if (!res!.ok) throw new Error(`Model request failed (${res!.status}): ${body?.error?.message ?? "unknown error"}`);
-  const args = body.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  if (!args) throw new Error("The model returned no structured answer.");
-  return JSON.parse(args);
+  throw new Error(`Model request failed: ${lastError}`);
 }
 
 /** Forces the model to answer through one tool, validates the result, and retries once. */

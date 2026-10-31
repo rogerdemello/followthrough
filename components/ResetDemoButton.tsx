@@ -26,7 +26,7 @@ export default function ResetDemoButton() {
       onClick={reset}
       disabled={busy}
       title="Clears everything and reloads Monday's sample meeting"
-      className={`${btn.secondary} !px-3 !py-1.5`}
+      className={`${btn.glass} !px-3 !py-1.5`}
     >
       {busy ? "Resetting…" : "Reset demo data"}
     </button>

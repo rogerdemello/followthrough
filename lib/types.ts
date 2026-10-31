@@ -23,6 +23,8 @@ export type DraftAction = {
 };
 
 export type Draft = {
+  /** Set when the result came from a saved sample instead of the live model. */
+  notice?: string;
   /** Number of earlier decisions the new ones were checked against. */
   earlierDecisions: number;
   /** Where tasks will be created, as a readable phrase. */

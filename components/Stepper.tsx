@@ -19,11 +19,11 @@ export default function Stepper({ current }: { current: 1 | 2 | 3 }) {
           {STEPS.map((s) => (
             <span
               key={s.n}
-              className={`h-1.5 flex-1 rounded-full ${s.n <= current ? "bg-indigo-600" : "bg-slate-200"}`}
+              className={`h-1.5 flex-1 rounded-full ${s.n <= current ? "bg-gradient-to-r from-indigo-400 to-violet-400" : "bg-white/15"}`}
             />
           ))}
         </div>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-indigo-600">
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-indigo-300">
           Step {current} of 3 · {active.title}
         </p>
       </div>
@@ -42,28 +42,26 @@ export default function Stepper({ current }: { current: 1 | 2 | 3 }) {
                 <span
                   aria-hidden
                   className={`absolute left-[15px] top-9 h-[calc(100%-2.25rem)] w-0.5 ${
-                    state === "done" ? "bg-indigo-600" : "bg-slate-200"
+                    state === "done" ? "bg-indigo-400" : "bg-white/15"
                   }`}
                 />
               )}
               <span
                 className={`z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
                   state === "current"
-                    ? "bg-indigo-600 text-white ring-4 ring-indigo-100"
+                    ? "bg-gradient-to-br from-indigo-400 to-violet-500 text-white shadow-lg shadow-indigo-500/50 ring-4 ring-indigo-400/20"
                     : state === "done"
-                      ? "bg-indigo-600 text-white"
-                      : "border-2 border-slate-300 bg-white text-slate-400"
+                      ? "bg-indigo-500 text-white"
+                      : "border-2 border-white/25 bg-transparent text-slate-400"
                 }`}
               >
                 {state === "done" ? <Check /> : s.n}
               </span>
               <div className={state === "todo" ? "opacity-60" : ""}>
-                <p
-                  className={`font-semibold ${state === "current" ? "text-slate-900" : "text-slate-700"}`}
-                >
+                <p className={`font-semibold ${state === "current" ? "text-white" : "text-slate-200"}`}>
                   {s.title}
                 </p>
-                <p className="mt-0.5 text-sm text-slate-600">{s.body}</p>
+                <p className="mt-0.5 text-sm text-slate-400">{s.body}</p>
               </div>
             </li>
           );
