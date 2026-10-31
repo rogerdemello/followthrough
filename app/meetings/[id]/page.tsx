@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DeleteMeetingButton from "@/components/DeleteMeetingButton";
+import DoneToggle from "@/components/DoneToggle";
 import RemindLink from "@/components/RemindLink";
 import TaskLink from "@/components/TaskLink";
 import { sourceLabel } from "@/lib/format";
@@ -59,6 +61,9 @@ export default async function MeetingPage({ params }: { params: Promise<{ id: st
             <table className="w-full min-w-[36rem] text-left text-sm">
               <thead className="border-b border-ink/20 text-xs text-muted">
                 <tr>
+                  <th className="w-10 px-5 py-3 font-semibold">
+                    <span className="sr-only">Done</span>
+                  </th>
                   <th className="px-5 py-3 font-semibold">Task</th>
                   <th className="px-5 py-3 font-semibold">Owner</th>
                   <th className="px-5 py-3 font-semibold">Due</th>
@@ -71,7 +76,12 @@ export default async function MeetingPage({ params }: { params: Promise<{ id: st
               <tbody className="divide-y divide-rule">
                 {actions.map((a) => (
                   <tr key={a.id}>
-                    <td className="px-5 py-3 font-medium">{a.text}</td>
+                    <td className="px-5 py-3">
+                      <DoneToggle id={a.id} done={a.status === "done"} label={a.text} />
+                    </td>
+                    <td className={`px-5 py-3 font-medium ${a.status === "done" ? "text-muted line-through" : ""}`}>
+                      {a.text}
+                    </td>
                     <td className="px-5 py-3">{a.owner ?? "—"}</td>
                     <td className="whitespace-nowrap px-5 py-3">{a.due_on ?? "—"}</td>
                     <td className="px-5 py-3">
@@ -97,6 +107,14 @@ export default async function MeetingPage({ params }: { params: Promise<{ id: st
         <pre className={`${card} whitespace-pre-wrap p-5 font-sans text-sm leading-relaxed text-ink-2`}>
           {meeting.raw_text}
         </pre>
+      </section>
+
+      <section className="border-t border-rule pt-6">
+        <DeleteMeetingButton id={meeting.id} title={meeting.title} />
+        <p className="mt-2 text-xs text-muted">
+          Entered something wrong? Deleting removes this meeting’s decisions and tasks, and brings back any
+          earlier decisions it replaced.
+        </p>
       </section>
     </div>
   );

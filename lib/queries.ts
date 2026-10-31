@@ -81,6 +81,14 @@ export function getOpenActionsFor(person: string): ActionRow[] {
   );
 }
 
+export function getDoneActionsFor(person: string, limit = 8): ActionRow[] {
+  return all<ActionRow>(
+    `${ACTION_SELECT} WHERE a.status = 'done' AND lower(a.owner) = lower(?) ORDER BY a.id DESC LIMIT ?`,
+    person,
+    limit,
+  );
+}
+
 export function getAllOpenActions(): ActionRow[] {
   return all<ActionRow>(`${ACTION_SELECT} WHERE a.status = 'open' ORDER BY a.due_on IS NULL, a.due_on, a.id`);
 }

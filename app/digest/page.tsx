@@ -1,9 +1,16 @@
 import Link from "next/link";
+import DoneToggle from "@/components/DoneToggle";
 import RemindLink from "@/components/RemindLink";
 import TaskLink from "@/components/TaskLink";
 import { daysBetween, relativeDue } from "@/lib/format";
 import { btn, card, sectionLabel } from "@/lib/ui";
-import { getOpenActionsFor, getPeople, getSupersededDecisions, type ActionRow } from "@/lib/queries";
+import {
+  getDoneActionsFor,
+  getOpenActionsFor,
+  getPeople,
+  getSupersededDecisions,
+  type ActionRow,
+} from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +23,10 @@ function Group({ title, items, tone, today }: { title: string; items: ActionRow[
       </h2>
       <ul className={`${card} divide-y divide-rule`}>
         {items.map((a) => (
-          <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm">
-            <div>
-              <p className="font-medium">{a.text}</p>
+          <li key={a.id} className="flex flex-wrap items-center gap-3 px-5 py-3 text-sm">
+            <DoneToggle id={a.id} done={a.status === "done"} label={a.text} />
+            <div className="min-w-0 flex-1">
+              <p className={`font-medium ${a.status === "done" ? "text-muted line-through" : ""}`}>{a.text}</p>
               <p className="mt-0.5 text-xs text-muted">
                 {a.meeting_title} · {a.due_on ? `${a.due_on} (${relativeDue(a.due_on, today).label})` : "no date"}
               </p>
@@ -52,6 +60,7 @@ export default async function DigestPage({
   const overdue = open.filter((a) => a.due_on && a.due_on < today);
   const soon = open.filter((a) => a.due_on && a.due_on >= today && daysBetween(today, a.due_on) <= 7);
   const later = open.filter((a) => !a.due_on || daysBetween(today, a.due_on) > 7);
+  const done = selected ? getDoneActionsFor(selected) : [];
   const changed = getSupersededDecisions();
 
   return (
@@ -92,10 +101,18 @@ export default async function DigestPage({
             </div>
           </div>
 
-          {open.length === 0 && <p className="text-sm text-ink-2">Nothing open for {selected}.</p>}
+          {open.length === 0 && (
+            <p className="text-sm text-ink-2">
+              Nothing open for {selected}.{done.length > 0 ? " Nice work." : ""}
+            </p>
+          )}
+          {open.length + done.length > 0 && (
+            <p className="text-sm text-ink-2">Tick a task when it’s finished. Untick it to reopen it.</p>
+          )}
           <Group title="Overdue" items={overdue} tone="text-accent" today={today} />
           <Group title="Due in the next 7 days" items={soon} tone="text-ink" today={today} />
           <Group title="Later" items={later} tone="text-ink-2" today={today} />
+          <Group title="Done" items={done} tone="text-ok" today={today} />
         </>
       )}
 

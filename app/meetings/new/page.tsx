@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import MicButton from "@/components/MicButton";
 import RemindLink from "@/components/RemindLink";
 import Spinner from "@/components/Spinner";
 import { useStreak } from "@/components/StreakBadge";
@@ -36,6 +37,27 @@ const ANALYZING_MESSAGES = [
   "Pulling out decisions, owners and deadlines…",
   "Checking earlier decisions for conflicts…",
 ];
+
+const DRAFT_KEY = "ft_draft_v1";
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/** Turns raw service errors into something a person can act on. */
+function friendlyError(reason: string): string {
+  if (/429|quota|503|overload|busy|Model request failed|no model configured/i.test(reason)) {
+    return "The AI service is busy or out of free capacity right now. Wait a minute, then press the button again. Your recap is still here.";
+  }
+  if (/failed to fetch|network|load failed/i.test(reason)) {
+    return "We couldn’t reach the server. Check your connection and try again. Your recap is still here.";
+  }
+  return `${reason}. Your recap is still here, so you can try again.`;
+}
 
 function plural(n: number, word: string) {
   return `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -108,7 +130,11 @@ export default function NewMeetingPage() {
   const [heldOn, setHeldOn] = useState(() => new Date().toISOString().slice(0, 10));
   const [source, setSource] = useState<Source>("dictated");
   const [rawText, setRawText] = useState("");
+  const [interim, setInterim] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [restored, setRestored] = useState(false);
+  const effectiveTitle = title.trim() || `Meeting on ${heldOn}`;
 
   const [loading, setLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -133,13 +159,42 @@ export default function NewMeetingPage() {
     setError(null);
   }
 
-  // "Start the guided demo" on the home page links here with ?demo=1.
+  // "Try the demo" on the home page links here with ?demo=1. Otherwise bring back an unsaved draft.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("demo") === "1") {
       loadSample();
       setDemoMode(true);
+    } else {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        const d = raw ? JSON.parse(raw) : null;
+        if (d && typeof d.rawText === "string" && d.rawText.trim()) {
+          setTitle(typeof d.title === "string" ? d.title : "");
+          setRawText(d.rawText);
+          if (typeof d.heldOn === "string") setHeldOn(d.heldOn);
+          if (d.source === "paste" || d.source === "dictated") setSource(d.source);
+          setRestored(true);
+        }
+      } catch {
+        // No saved draft, or storage is unavailable. Start fresh.
+      }
     }
+    setHydrated(true);
   }, []);
+
+  // Keep the recap safe if the tab is closed or refreshed before it's confirmed.
+  useEffect(() => {
+    if (!hydrated || demoMode) return;
+    try {
+      if (rawText.trim() || title.trim()) {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, heldOn, source, rawText }));
+      } else {
+        localStorage.removeItem(DRAFT_KEY);
+      }
+    } catch {
+      // Drafts are a convenience; ignore storage errors.
+    }
+  }, [hydrated, demoMode, title, heldOn, source, rawText]);
 
   // Rotate the progress message while the model works.
   useEffect(() => {
@@ -165,7 +220,7 @@ export default function NewMeetingPage() {
     setError(null);
     try {
       const { draft } = await post<{ draft: Draft }>("/api/extract", {
-        title: title.trim(),
+        title: effectiveTitle,
         heldOn,
         rawText,
         source,
@@ -187,8 +242,7 @@ export default function NewMeetingPage() {
       );
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      const reason = err instanceof Error ? err.message : "unknown error";
-      setError(`We couldn’t analyze the recap: ${reason}. Your text is still here, so you can try again.`);
+      setError(friendlyError(err instanceof Error ? err.message : "Something went wrong"));
     } finally {
       setLoading(false);
     }
@@ -216,7 +270,7 @@ export default function NewMeetingPage() {
         .map((a) => ({ alias: a.originalOwner as string, canonical: a.owner.trim() }));
 
       const res = await post<ConfirmResult>("/api/confirm", {
-        title: title.trim(),
+        title: effectiveTitle,
         heldOn,
         rawText,
         source,
@@ -241,10 +295,11 @@ export default function NewMeetingPage() {
       });
       setResult(res);
       recordActivity();
+      clearDraft();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      const reason = err instanceof Error ? err.message : "unknown error";
-      setError(`We couldn’t save this meeting: ${reason}. Nothing was created, so you can try again.`);
+      const reason = err instanceof Error ? err.message : "Something went wrong";
+      setError(`We couldn’t save this meeting (${reason}). Nothing was created, so you can try again.`);
     } finally {
       setLoading(false);
     }
@@ -266,10 +321,13 @@ export default function NewMeetingPage() {
     setRawText("");
     setError(null);
     setDemoMode(false);
+    setRestored(false);
+    clearDraft();
   }
 
   const step: 1 | 2 | 3 = result ? 3 : decisions ? 2 : 1;
-  const canExtract = title.trim().length > 0 && rawText.trim().length >= 10;
+  const canExtract = rawText.trim().length >= 10;
+  const wordCount = rawText.trim() ? rawText.trim().split(/\s+/).length : 0;
 
   let content: React.ReactNode;
 
@@ -310,7 +368,7 @@ export default function NewMeetingPage() {
                   <RemindLink
                     title={a.text}
                     dueOn={a.due_on}
-                    details={`From ${title}. Owner: ${a.owner ?? "unassigned"}.`}
+                    details={`From ${effectiveTitle}. Owner: ${a.owner ?? "unassigned"}.`}
                   />
                 </div>
               </li>
@@ -342,7 +400,7 @@ export default function NewMeetingPage() {
       <div>
         <StepHeader
           step={2}
-          title={`Review “${title}”`}
+          title={`Review “${effectiveTitle}”`}
           body={`Nothing is saved or sent until you confirm. Fix anything that looks wrong.${
             speakers.length > 0 ? ` People mentioned: ${speakers.join(", ")}.` : ""
           }`}
@@ -556,28 +614,71 @@ export default function NewMeetingPage() {
           </div>
         )}
 
+        {restored && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink/20 bg-paper px-4 py-3 text-sm">
+            <span>We kept the recap you hadn’t finished.</span>
+            <button
+              type="button"
+              onClick={() => {
+                setRawText("");
+                setTitle("");
+                setRestored(false);
+                clearDraft();
+              }}
+              className="font-semibold underline"
+            >
+              Start fresh
+            </button>
+          </div>
+        )}
+
         <Field label="What was said">
           <textarea
             className={`${input} h-56 leading-relaxed`}
             placeholder="Click here and start talking, or paste your transcript…"
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canExtract) extract();
+            }}
           />
         </Field>
-        <p className="mt-2 text-xs text-muted">
-          Tip: talk naturally. “Um”, “uh” and “Thursday, no wait, Friday” are handled.{" "}
-          <button type="button" onClick={loadSample} className="font-medium text-ink underline">
-            Load a sample recap
-          </button>
-        </p>
+        {interim && <p className="mt-1 text-sm italic text-muted">{interim}</p>}
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <MicButton
+            onFinal={(t) =>
+              setRawText((prev) => (prev && !/\s$/.test(prev) ? `${prev} ` : prev) + t)
+            }
+            onInterim={setInterim}
+          />
+          <p className="text-xs text-muted">
+            {wordCount} {wordCount === 1 ? "word" : "words"} · Ctrl+Enter to continue
+          </p>
+        </div>
+
+        <details className="mt-5 rounded-md border border-rule bg-paper/60 px-4 py-3 text-sm">
+          <summary className="cursor-pointer font-semibold">What makes a good recap?</summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-ink-2">
+            <li>Say who is doing what, and by when: “Rahul will finish it by Friday.”</li>
+            <li>State decisions plainly: “We’re moving the launch to December 1.”</li>
+            <li>Talk the way you would to a colleague. “Um” and “no wait, Friday” are fine.</li>
+            <li>One meeting at a time works best.</li>
+          </ul>
+          <p className="mt-3 text-ink-2">
+            No recap handy?{" "}
+            <button type="button" onClick={loadSample} className="font-semibold text-ink underline">
+              Load a sample recap
+            </button>
+          </p>
+        </details>
 
         <div className="mt-8">
           <h2 className={`mb-3 ${sectionLabel}`}>Meeting details</h2>
           <div className="grid gap-4 sm:grid-cols-[1fr_10rem_11rem]">
-            <Field label="Title">
+            <Field label="Title (optional)">
               <input
                 className={input}
-                placeholder="e.g. Product sync"
+                placeholder={`Meeting on ${heldOn}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -608,7 +709,7 @@ export default function NewMeetingPage() {
             Continue to review →
           </button>
           {!canExtract && (
-            <p className="text-xs text-muted">Add a title and a few words of recap to continue.</p>
+            <p className="text-xs text-muted">Add a few words of recap to continue.</p>
           )}
         </div>
       </div>
