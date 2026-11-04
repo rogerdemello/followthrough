@@ -59,3 +59,4 @@ Open http://localhost:3000 and click "Try the 2-minute demo". Without `GITHUB_TO
 | 5 | [Build plan](docs/05-build-plan.md) | Timeboxed plan and cut lines |
 | 6 | [Demo script and seed data](docs/06-demo-script-and-seed-data.md) | The 2-minute demo and sample meetings |
 | 7 | [LinkedIn plan](docs/07-linkedin-plan.md) | Posting plan |
+| 8 | [Project summary](docs/08-project-summary.md) | What was asked, built, decided and what is left |
