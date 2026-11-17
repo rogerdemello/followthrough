@@ -14,9 +14,10 @@ const INPUT_SCHEMA = {
           new_index: { type: "integer" },
           old_decision_id: { type: "integer" },
           kind: { type: "string", enum: ["contradicts", "supersedes", "consistent"] },
+          same_subject: { type: "boolean" },
           reason: { type: "string" },
         },
-        required: ["new_index", "old_decision_id", "kind", "reason"],
+        required: ["new_index", "old_decision_id", "kind", "same_subject", "reason"],
       },
     },
   },
@@ -31,6 +32,7 @@ For each new decision, check it against each earlier decision on the same subjec
 - "consistent": no conflict.
 
 Only return pairs that are about the same subject. Skip unrelated pairs.
+same_subject: true only when both decisions settle the same question (for example both choose a payments provider, or both set a launch date). Set false when the topics differ, even if both mention the product or the team, and then kind must be "consistent".
 reason: one short sentence that names the earlier choice and what changed. Use only facts that appear in the decision texts. Copy dates, names and numbers exactly as written in the earlier decision; never guess or infer a value that is not written there. If unsure of a detail, leave it out.`;
 
 /** Returns, per new-decision index, the earlier decisions it conflicts with. */
@@ -67,7 +69,7 @@ export async function detectConflicts(
 
   const byId = new Map(active.map((d) => [d.id, d]));
   for (const r of result.results) {
-    if (r.kind === "consistent") continue;
+    if (r.kind === "consistent" || r.same_subject === false) continue;
     const old = byId.get(r.old_decision_id);
     if (!old || r.new_index < 0 || r.new_index >= newDecisions.length) continue;
     const list = out.get(r.new_index) ?? [];

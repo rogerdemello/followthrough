@@ -23,6 +23,7 @@ export const ConflictResultSchema = z.object({
       new_index: z.number().int(),
       old_decision_id: z.number().int(),
       kind: z.enum(["contradicts", "supersedes", "consistent"]),
+      same_subject: z.boolean().optional(),
       reason: z.string(),
     }),
   ),
